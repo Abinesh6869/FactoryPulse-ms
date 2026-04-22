@@ -1,0 +1,70 @@
+server:
+  port: 8888   # change back to 8080 once port is free
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+
+        # ── Auth Service (9090) ──────────────────────────────────────────────
+        - id: auth-service
+          uri: http://localhost:9090
+          predicates:
+            - Path=/api/auth/**, /api/users/**
+          filters:
+            - StripPrefix=0
+
+        # ── Telemetry Service (9091) ─────────────────────────────────────────
+        - id: telemetry-service
+          uri: http://localhost:9091
+          predicates:
+            - Path=/api/telemetry/**
+          filters:
+            - StripPrefix=0
+
+        # ── Asset Service (9092) ─────────────────────────────────────────────
+        - id: asset-service
+          uri: http://localhost:9092
+          predicates:
+            - Path=/api/plants/**, /api/lines/**, /api/machines/**, /api/shifts/**, /api/shift-allocations/**
+          filters:
+            - StripPrefix=0
+
+        # ── Operations Service (9093) ────────────────────────────────────────
+        - id: operation-service
+          uri: http://localhost:9093
+          predicates:
+            - Path=/api/downtimes/**, /api/workorders/**, /api/maintenance-logs/**, /api/rootcauses/**, /api/alertrules/**, /api/alerts/**
+          filters:
+            - StripPrefix=0
+
+        # ── FactoryPulse / Analytics Service (8081) ──────────────────────────
+        - id: factorypulse-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/oee/**, /api/kpis/**, /api/reports/**, /api/quality-correlation/**, /api/throughput-forecasts/**, /api/machine-docs/**, /api/audit-logs/**
+          filters:
+            - StripPrefix=0
+
+# ── Eureka ────────────────────────────────────────────────────────────────────
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+
+# ── JWT ───────────────────────────────────────────────────────────────────────
+jwt:
+  secret: FactoryPulseSecretKeyUsedToHashPasswordsBetterToUseALongHashToEncrypt
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    org.cts.factorypulse.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
