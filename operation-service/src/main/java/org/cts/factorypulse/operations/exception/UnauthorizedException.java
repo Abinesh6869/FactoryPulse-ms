@@ -1,0 +1,5 @@
+package org.cts.factorypulse.operations.exception;
+
+public class UnauthorizedException extends RuntimeException {
+    public UnauthorizedException(String message) { super(message); }
+}
